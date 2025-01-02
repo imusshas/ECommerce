@@ -1,0 +1,15 @@
+.account-info {
+  font-weight: 500;
+  padding: var(--form-padding);
+  border: var(--border);
+  border-radius: var(--border-radius-large);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--gap-vertical);
+}
+
+.account-info span {
+  font-weight: 400;
+}

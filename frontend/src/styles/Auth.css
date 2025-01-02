@@ -1,0 +1,16 @@
+.role-buttons {
+  display: flex;
+  gap: var(--gap-horizontal);
+}
+
+.role-buttons button, .role-buttons button:hover {
+  background: none;
+  color: var(--text-color);
+  border: var(--border);
+  border-radius: var(--border-radius-small);
+}
+
+.role-buttons button.selected {
+  box-shadow: var(--box-shadow);
+  border: var(--border-focus);
+}
