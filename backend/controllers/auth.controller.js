@@ -62,13 +62,14 @@ const signup = async (req, res) => {
 
     // If the user's role is e-commerce or supplier check if their already exists a e-commerce or a supplier
     if (role === USER_ROLES.eCommerce || role === USER_ROLES.supplier) {
-      const existingECommerce = await User.findOne({ role: USER_ROLES.eCommerce });
-      const existingSupplier = await User.findOne({ role: USER_ROLES.supplier });
+      const existingUser = await User.findOne({ role });
+      if (existingUser) {
+        if (role === USER_ROLES.eCommerce) {
+          throw new ApiError(400, "E-Commerce already exists");
+        } else {
+          throw new ApiError(400, "Supplier already exists");
+        }
 
-      if (existingECommerce) {
-        throw new ApiError(400, "E-Commerce already exists");
-      } else if (existingSupplier) {
-        throw new ApiError(400, "Supplier already exists");
       }
     }
 
@@ -116,10 +117,17 @@ const bankSignUp = async (req, res) => {
       throw new ApiError(400, "Bank already exists");
     }
 
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      throw new ApiError(400, "All fields are required");
+    }
+
     const bank = await Bank.create({
       name,
       email,
-      password
+      password,
+      role: USER_ROLES.bank,
     });
 
     if (!bank) {
