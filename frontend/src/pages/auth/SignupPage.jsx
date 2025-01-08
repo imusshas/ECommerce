@@ -5,7 +5,7 @@ import { signup } from "../../reducers/authSlice";
 import "../../styles/Auth.css";
 
 export const SignupPage = () => {
-  const { loading, user, error } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   const userRoles = {
@@ -20,11 +20,15 @@ export const SignupPage = () => {
     name: "",
     email: "",
     password: "",
+    nameError: "",
+    emailError: "",
+    passwordError: "",
   });
 
   const [submittedOnce, setSubmittedOnce] = useState(false);
 
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
   const formInputs = [
     {
       type: "text",
@@ -32,7 +36,7 @@ export const SignupPage = () => {
       field: "Full Name",
       placeholder: "Enter Full Name",
       value: formStates.name,
-      error: submittedOnce ? (formStates.name ? "" : "Full name is required") : "",
+      error: submittedOnce ? formStates.nameError : "",
     },
     {
       type: "email",
@@ -40,13 +44,7 @@ export const SignupPage = () => {
       field: "Email",
       placeholder: "Enter Email",
       value: formStates.email,
-      error: submittedOnce
-        ? formStates.email
-          ? emailRegex.test(formStates.email)
-            ? ""
-            : "Invalid email"
-          : "Email is required"
-        : "",
+      error: submittedOnce ? formStates.emailError : "",
     },
     {
       type: "password",
@@ -54,15 +52,26 @@ export const SignupPage = () => {
       field: "Password",
       placeholder: "Enter Password",
       value: formStates.password,
-      error: submittedOnce
-        ? formStates.password
-          ? formStates.password.length < 6
-            ? "Password must contain at least 6 characters"
-            : ""
-          : "Password is required"
-        : "",
+      error: submittedOnce ? formStates.passwordError : "",
     },
   ];
+
+  const validateName = (name) => {
+    if (!name) return "Full name is required";
+    return "";
+  };
+
+  const validateEmail = (email) => {
+    if (!email) return "Email is required";
+    if (!emailRegex.test(email)) return "Invalid email";
+    return "";
+  };
+
+  const validatePassword = (password) => {
+    if (!password) return "Password is required";
+    if (password.length < 6) return "Password must contain at least 6 characters";
+    return "";
+  };
 
   const handleRoleClick = (role) => {
     setFormStates((prevState) => ({
@@ -78,32 +87,48 @@ export const SignupPage = () => {
       ...prevState,
       [name]: value,
     }));
+
+    if (submittedOnce) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        nameError: name === "name" ? validateName(value) : prevState.nameError,
+        emailError: name === "email" ? validateEmail(value) : prevState.emailError,
+        passwordError: name === "password" ? validatePassword(value) : prevState.passwordError,
+      }));
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmittedOnce(true);
 
-    // If there are errors, prevent form submission
-    if (!formStates.name || !formStates.email || !formStates.password) {
-      return;
+    // Validate inputs before submission
+    const nameError = validateName(formStates.name);
+    const emailError = validateEmail(formStates.email);
+    const passwordError = validatePassword(formStates.password);
+
+    if (nameError || emailError || passwordError) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        nameError,
+        emailError,
+        passwordError,
+      }));
+      return; // Stop form submission if validation fails
     }
 
     dispatch(
-      signup({ name: formStates.name, email: formStates.email, password: formStates.password, role: formStates.role }),
+      signup({
+        name: formStates.name,
+        email: formStates.email,
+        password: formStates.password,
+        role: formStates.role,
+      }),
     );
   };
 
   if (user) {
     return <Navigate to="/" replace />;
-  }
-
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return <p>Signup: {error}</p>;
   }
 
   return (

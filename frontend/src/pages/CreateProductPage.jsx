@@ -5,77 +5,72 @@ import { createProduct } from "../utils/apiCalls";
 import { ViewProduct } from "../components/ViewProduct";
 
 export const CreateProductPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [product, setProduct] = useState({});
+  const [error, setError] = useState(null);
+
   const [formStates, setFormStates] = useState({
     imageUrl: "",
     name: "",
-    price: 0,
+    price: "",
     description: "",
+    imageUrlError: "",
+    nameError: "",
+    priceError: "",
+    descriptionError: "",
   });
-  const [product, setProduct] = useState({});
-
   const [imagePreview, setImagePreview] = useState("");
   const [submittedOnce, setSubmittedOnce] = useState(false);
 
-  const imageInput = {
-    type: "file",
-    name: "imageUrl",
-    field: "Product Image",
-    placeholder: "Upload Product Image",
-    accept: "image/*",
-    value: formStates.image,
-    error: submittedOnce ? (formStates.imageUrl ? "" : "Product image is required") : "",
+  useEffect(() => {}, [imagePreview, setImagePreview]);
+
+  // Create functions for validation
+  // Validate imageUrl also
+  const validateImageUrl = (imageUrl) => {
+    if (!imageUrl) return "Product image is required";
+    return "";
+  };
+  const validateName = (name) => {
+    if (!name) return "Product name is required";
+    return "";
   };
 
-  const formInputs = [
-    {
-      type: "text",
-      name: "name",
-      field: "Name",
-      placeholder: "Enter Product Name",
-      value: formStates.name,
-      error: submittedOnce ? (formStates.name ? "" : "Product name is required") : "",
-    },
-    {
-      type: "number",
-      name: "price",
-      field: "Price",
-      placeholder: "Enter Price",
-      value: formStates.price,
-      error: submittedOnce
-        ? !formStates.price
-          ? "Product price is required"
-          : formStates.price <= 0 || isNaN(formStates.price)
-          ? "Price must be greater than 0"
-          : ""
-        : "",
-    },
-    {
-      type: "text",
-      name: "description",
-      field: "Product Description",
-      placeholder: "Enter Product Description",
-      value: formStates.description,
-      error: submittedOnce ? (formStates.description ? "" : "Product description is required") : "",
-      className: "create-product-description-input",
-    },
-  ];
+  const validatePrice = (price) => {
+    if (!price) return "Product price is required";
+    if (price <= 0 || isNaN(price)) return "Price must be greater than 0";
+    return "";
+  };
 
+  const validateDescription = (description) => {
+    if (!description) return "Product description is required";
+    return "";
+  };
+
+  // Handle image change (upload)
   const handleImageChange = (e) => {
     e.preventDefault();
 
     const { name, files } = e.target;
-    console.log(e);
 
     if (files && files[0]) {
       const file = files[0];
       setImagePreview(URL.createObjectURL(file)); // Create image preview
       setFormStates((prevState) => ({
         ...prevState,
-        [name]: file,
+        imageUrl: file, // Store the file object (not the value of the input)
       }));
+
+      if (submittedOnce) {
+        const imageUrlError = name === "imageUrl" ? validateImageUrl(file) : "";
+        setFormStates((prevState) => ({
+          ...prevState,
+          imageUrlError,
+        }));
+      }
     }
   };
 
+  // Handle input field changes
   const handleInputChange = (e) => {
     e.preventDefault();
     const { name, value } = e.target;
@@ -83,26 +78,61 @@ export const CreateProductPage = () => {
       ...prevState,
       [name]: value,
     }));
+
+    // Validate form fields if once submitted
+    if (submittedOnce) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        nameError: name === "name" ? validateName(value) : "",
+        priceError: name === "price" ? validatePrice(value) : "",
+        descriptionError: name === "description" ? validateDescription(value) : "",
+      }));
+    }
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmittedOnce(true);
 
-    console.log(formStates);
-    if (!formStates.imageUrl || !formStates.name || !formStates.price || !formStates.description) {
+    // Validate inputs before submission
+    const imageUrlError = validateImageUrl(formStates.imageUrl);
+    const nameError = validateName(formStates.name);
+    const priceError = validatePrice(formStates.price);
+    const descriptionError = validateDescription(formStates.description);
+
+    if (imageUrlError || nameError || priceError || descriptionError) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        imageUrlError,
+        nameError,
+        priceError,
+        descriptionError,
+      }));
       return;
     }
 
-    const createdProduct = await createProduct({
+    setLoading(true);
+    const { data, error } = await createProduct({
       name: formStates.name,
       price: formStates.price,
       description: formStates.description,
       imageUrl: formStates.imageUrl,
     });
-
-    setProduct(createdProduct);
+    setProduct(data);
+    setError(error);
+    setLoading(false);
   };
+
+  // Show loading spinner if the product is being created
+  if (loading) {
+    return <LoadingPage />;
+  }
+
+  // Show error page if there's an error
+  if (error) {
+    return <ErrorPage error={error} />;
+  }
 
   return (
     <div className="layout-container">

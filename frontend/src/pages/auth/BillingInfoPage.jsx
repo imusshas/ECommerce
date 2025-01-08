@@ -8,9 +8,14 @@ import { getUser } from "../../reducers/authSlice";
 export const BillingInfoPage = () => {
   const dispatch = useDispatch();
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const [formStates, setFormStates] = useState({
     accountNo: "",
     accountSecret: "",
+    accountNoError: "",
+    accountSecretError: "",
   });
 
   const [submittedOnce, setSubmittedOnce] = useState(false);
@@ -23,13 +28,7 @@ export const BillingInfoPage = () => {
       field: "Account No",
       placeholder: "Enter Account No",
       value: formStates.accountNo,
-      error: submittedOnce
-        ? formStates.accountNo
-          ? /^\d{12}$/.test(formStates.accountNo)
-            ? ""
-            : "Account Number must contain exactly 12 digits"
-          : "Account Number is required"
-        : "",
+      error: submittedOnce ? formStates.accountNoError : "",
     },
     {
       type: "password",
@@ -37,15 +36,21 @@ export const BillingInfoPage = () => {
       field: "Account Secret",
       placeholder: "Enter Account Secret",
       value: formStates.accountSecret,
-      error: submittedOnce
-        ? formStates.accountSecret
-          ? formStates.accountSecret.length < 6
-            ? "Account secret must contain at least 6 characters"
-            : ""
-          : "Account secret is required"
-        : "",
+      error: submittedOnce ? formStates.accountSecretError : "",
     },
   ];
+
+  const validateAccountNo = (accountNo) => {
+    if (!accountNo) return "Account Number is required";
+    if (!/^\d{12}$/.test(accountNo)) return "Account Number must contain exactly 12 digits";
+    return "";
+  };
+
+  const validateAccountSecret = (accountSecret) => {
+    if (!accountSecret) return "Account secret is required";
+    if (accountSecret.length < 6) return "Account secret must contain at least 6 characters";
+    return "";
+  };
 
   const handleInputChange = (e) => {
     e.preventDefault();
@@ -54,26 +59,62 @@ export const BillingInfoPage = () => {
       ...prevState,
       [name]: value,
     }));
+
+    if (submittedOnce) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        accountNoError: name === "accountNo" ? validateAccountNo(value) : prevState.accountNoError,
+        accountSecretError: name === "accountSecret" ? validateAccountSecret(value) : prevState.accountSecretError,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmittedOnce(true);
 
-    if (!formStates.accountNo || !formStates.accountSecret) {
-      return;
+    // Validate the inputs before submitting
+    const accountNoError = validateAccountNo(formStates.accountNo);
+
+    const accountSecretError = validateAccountSecret(formStates.accountSecret);
+
+    if (accountNoError || accountSecretError) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        accountNoError,
+        accountSecretError,
+      }));
+      return; // Stop form submission if validation fails
     }
 
-    // Call the createBankAccount function here
-    const updatedAccount = await addBillingInfo({
+    // Proceed with API call if validation is passed
+    setLoading(true);
+    console.log(formStates);
+    const { data, error } = await addBillingInfo({
       accountNo: formStates.accountNo,
       accountSecret: formStates.accountSecret,
     });
 
-    dispatch(getUser());
+    setBankAccount(data);
+    setError(error);
+    setLoading(false);
 
-    setBankAccount(updatedAccount);
+    if (!error) {
+      dispatch(getUser());
+    }
   };
+
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error.message}</div>;
+  }
 
   return (
     <div className="form-wrapper flex-column flex-center border-none">
@@ -102,9 +143,19 @@ export const BillingInfoPage = () => {
           </div>
         ))}
 
-        <button type="submit" disabled={formInputs.some((input) => input.error) || bankAccount?._id} className="btn">
-          Submit
-        </button>
+        <div className="flex">
+          <button type="submit" disabled={formInputs.some((input) => input.error) || bankAccount?._id} className="btn">
+            Submit
+          </button>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={formInputs.some((input) => input.error) || bankAccount?._id}
+            className="btn"
+          >
+            Logout
+          </button>
+        </div>
       </form>
 
       {bankAccount?._id && (

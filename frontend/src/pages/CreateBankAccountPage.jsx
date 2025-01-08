@@ -1,14 +1,24 @@
 import { useState } from "react";
 import { createBankAccount } from "../utils/apiCalls";
+import { LoadingPage } from "./LoadingPage";
+import { ErrorPage } from "./ErrorPage";
 
 export const CreateBankAccountPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [bankAccount, setBankAccount] = useState({});
+  const [error, setError] = useState(null);
+
   const [formStates, setFormStates] = useState({
     accountNo: "",
-    balance: 0,
+    balance: "",
     accountSecret: "",
+    accountNoError: "",
+    balanceError: "",
+    accountSecretError: "",
   });
 
   const [submittedOnce, setSubmittedOnce] = useState(false);
+
   const formInputs = [
     {
       type: "text",
@@ -16,13 +26,7 @@ export const CreateBankAccountPage = () => {
       field: "Account No",
       placeholder: "Enter Account No",
       value: formStates.accountNo,
-      error: submittedOnce
-        ? formStates.accountNo
-          ? /^\d{12}$/.test(formStates.accountNo)
-            ? ""
-            : "Account Number must contain exactly 12 digits"
-          : "Account Number is required"
-        : "",
+      error: submittedOnce ? formStates.accountNoError : "",
     },
     {
       type: "number",
@@ -30,13 +34,7 @@ export const CreateBankAccountPage = () => {
       field: "Bank Balance",
       placeholder: "Enter Amount",
       value: formStates.balance,
-      error: submittedOnce
-        ? !formStates.amount
-          ? "Amount is required"
-          : formStates.amount <= 0 || isNaN(formStates.amount)
-          ? "Amount must be greater than 0"
-          : ""
-        : "",
+      error: submittedOnce ? formStates.balanceError : "",
     },
     {
       type: "password",
@@ -44,15 +42,27 @@ export const CreateBankAccountPage = () => {
       field: "Account Secret",
       placeholder: "Enter Account Secret",
       value: formStates.accountSecret,
-      error: submittedOnce
-        ? formStates.accountSecret
-          ? formStates.accountSecret.length < 6
-            ? "Account secret must contain at least 6 characters"
-            : ""
-          : "Account secret is required"
-        : "",
+      error: submittedOnce ? formStates.accountSecretError : "",
     },
   ];
+
+  const validateAccountNo = (accountNo) => {
+    if (!accountNo) return "Account Number is required";
+    if (!/^\d{12}$/.test(accountNo)) return "Account Number must contain exactly 12 digits";
+    return "";
+  };
+
+  const validateBalance = (balance) => {
+    if (!balance) return "Amount is required";
+    if (balance <= 0 || isNaN(balance)) return "Amount must be greater than 0";
+    return "";
+  };
+
+  const validateAccountSecret = (accountSecret) => {
+    if (!accountSecret) return "Account secret is required";
+    if (accountSecret.length < 6) return "Account secret must contain at least 6 characters";
+    return "";
+  };
 
   const handleInputChange = (e) => {
     e.preventDefault();
@@ -61,26 +71,55 @@ export const CreateBankAccountPage = () => {
       ...prevState,
       [name]: value,
     }));
+
+    if (submittedOnce) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        accountNoError: name === "accountNo" ? validateAccountNo(value) : prevState.accountNoError,
+        balanceError: name === "balance" ? validateBalance(value) : prevState.balanceError,
+        accountSecretError: name === "accountSecret" ? validateAccountSecret(value) : prevState.accountSecretError,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmittedOnce(true);
-    if (!formStates.accountNo || !formStates.balance || !formStates.accountSecret) {
-      return;
+
+    // Validate inputs before submission
+    const accountNoError = validateAccountNo(formStates.accountNo);
+    const balanceError = validateBalance(formStates.balance);
+    const accountSecretError = validateAccountSecret(formStates.accountSecret);
+
+    if (accountNoError || balanceError || accountSecretError) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        accountNoError,
+        balanceError,
+        accountSecretError,
+      }));
+      return; // Stop form submission if validation fails
     }
 
-    // Call the createBankAccount function here
-    const updatedAccount = await createBankAccount({
+    // Call the createBankAccount function
+    setLoading(true);
+    const { data, error } = await createBankAccount({
       accountNo: formStates.accountNo,
       balance: formStates.balance,
       accountSecret: formStates.accountSecret,
     });
-
-    if (updatedAccount?._id) {
-      alert("Bank Account created successfully");
-    }
+    setBankAccount(data);
+    setError(error);
+    setLoading(false);
   };
+
+  if (loading) {
+    return <LoadingPage />;
+  }
+
+  if (error) {
+    return <ErrorPage error={error} />;
+  }
 
   return (
     <div>

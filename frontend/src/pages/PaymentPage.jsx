@@ -4,49 +4,70 @@ import { makePayment } from "../reducers/orderSlice";
 
 import "../styles/Payment.css";
 import { Navigate } from "react-router-dom";
+import { LoadingPage } from "./LoadingPage";
 
 export const PaymentPage = () => {
   const { cart, transaction, loading, error } = useSelector((state) => state.order);
   const dispatch = useDispatch();
-  const [accountSecret, setAccountSecret] = useState("");
   const [submittedOnce, setSubmittedOnce] = useState(false);
+  const [formStates, setFormStates] = useState({
+    accountSecret: "",
+    accountSecretError: "",
+  });
 
   const input = {
     type: "password",
     name: "accountSecret",
     field: "Account Secret",
     placeholder: "Enter Account Secret",
-    value: accountSecret,
-    error: submittedOnce
-      ? accountSecret
-        ? error?.message === "Invalid credentials"
-          ? "Invalid Account Secret"
-          : accountSecret.length < 6
-          ? "Account secret must contain at least 6 characters"
-          : ""
-        : "Account secret is required"
-      : "",
+    value: formStates.accountSecret,
+    error: submittedOnce ? formStates.accountSecretError : "",
+  };
+
+  const validateAccountSecret = (accountSecret) => {
+    if (!accountSecret) return "Account secret is required";
+    if (accountSecret.length < 6) return "Account secret must contain at least 6 characters";
+    return "";
   };
 
   const handleInputChange = (e) => {
-    setAccountSecret(e.target.value);
+    e.preventDefault();
+    const { name, value } = e.target;
+    setFormStates((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+
+    if (submittedOnce) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        accountSecretError: validateAccountSecret(value),
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmittedOnce(true);
 
-    if (!accountSecret) {
+    // Validate the inputs before submitting
+    const accountSecretError = validateAccountSecret(formStates.accountSecret);
+
+    if (accountSecretError) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        accountSecretError,
+      }));
       return;
     }
-    dispatch(makePayment({ orderId: cart._id, accountSecret }));
+    dispatch(makePayment({ orderId: cart._id, accountSecret: formStates.accountSecret }));
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <LoadingPage />;
   }
 
-  if (error && error?.message !== "Invalid credentials") {
+  if (error) {
     return <Navigate to="/payment/failure" replace />;
   }
 

@@ -5,17 +5,20 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../reducers/authSlice";
 
 export const LoginPage = () => {
-  const { user, loading, error } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   const [formStates, setFormStates] = useState({
     email: "",
     password: "",
+    emailError: "",
+    passwordError: "",
   });
 
   const [submittedOnce, setSubmittedOnce] = useState(false);
 
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
   const formInputs = [
     {
       type: "email",
@@ -23,13 +26,7 @@ export const LoginPage = () => {
       field: "Email",
       placeholder: "Enter Email",
       value: formStates.email,
-      error: submittedOnce
-        ? formStates.email
-          ? emailRegex.test(formStates.email)
-            ? ""
-            : "Invalid email"
-          : "Email is required"
-        : "",
+      error: submittedOnce ? formStates.emailError : "",
     },
     {
       type: "password",
@@ -37,15 +34,21 @@ export const LoginPage = () => {
       field: "Password",
       placeholder: "Enter Password",
       value: formStates.password,
-      error: submittedOnce
-        ? formStates.password
-          ? formStates.password.length < 6
-            ? "Password must contain at least 6 characters"
-            : ""
-          : "Password is required"
-        : "",
+      error: submittedOnce ? formStates.passwordError : "",
     },
   ];
+
+  const validateEmail = (email) => {
+    if (!email) return "Email is required";
+    if (!emailRegex.test(email)) return "Invalid email";
+    return "";
+  };
+
+  const validatePassword = (password) => {
+    if (!password) return "Password is required";
+    if (password.length < 6) return "Password must contain at least 6 characters";
+    return "";
+  };
 
   const handleInputChange = (e) => {
     e.preventDefault();
@@ -54,13 +57,31 @@ export const LoginPage = () => {
       ...prevState,
       [name]: value,
     }));
+
+    if (submittedOnce) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        emailError: name === "email" ? validateEmail(value) : prevState.emailError,
+        passwordError: name === "password" ? validatePassword(value) : prevState.passwordError,
+      }));
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmittedOnce(true);
-    if (!formStates.email || !formStates.password) {
-      return;
+
+    // Validate inputs before submission
+    const emailError = validateEmail(formStates.email);
+    const passwordError = validatePassword(formStates.password);
+
+    if (emailError || passwordError) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        emailError,
+        passwordError,
+      }));
+      return; // Stop form submission if validation fails
     }
 
     dispatch(login({ email: formStates.email, password: formStates.password }));
@@ -68,14 +89,6 @@ export const LoginPage = () => {
 
   if (user) {
     return <Navigate to="/" replace />;
-  }
-
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return <p>Login: {error}</p>;
   }
 
   return (

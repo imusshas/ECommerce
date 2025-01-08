@@ -1,15 +1,21 @@
 import { useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { addMoney } from "../utils/apiCalls";
+import { LoadingPage } from "./LoadingPage";
+import { ErrorPage } from "./ErrorPage";
 
 export const AddMoneyPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const location = useLocation();
   const { accountName, accountNo, balance } = location.state || {};
   const navigate = useNavigate();
 
   const [formStates, setFormStates] = useState({
-    amount: 0,
+    amount: "",
     accountSecret: "",
+    amountError: "",
+    accountSecretError: "",
   });
 
   const [submittedOnce, setSubmittedOnce] = useState(false);
@@ -21,13 +27,7 @@ export const AddMoneyPage = () => {
       field: "Amount",
       placeholder: "Enter Amount",
       value: formStates.amount,
-      error: submittedOnce
-        ? !formStates.amount
-          ? "Amount is required"
-          : formStates.amount <= 0 || isNaN(formStates.amount)
-          ? "Amount must be greater than 0"
-          : ""
-        : "",
+      error: submittedOnce ? formStates.amountError : "",
     },
     {
       type: "password",
@@ -35,15 +35,21 @@ export const AddMoneyPage = () => {
       field: "Account Secret",
       placeholder: "Enter Account Secret",
       value: formStates.accountSecret,
-      error: submittedOnce
-        ? formStates.accountSecret
-          ? formStates.accountSecret.length < 6
-            ? "Account secret must contain at least 6 characters"
-            : ""
-          : "Account secret is required"
-        : "",
+      error: submittedOnce ? formStates.accountSecretError : "",
     },
   ];
+
+  const validateAmount = (amount) => {
+    if (!amount) return "Amount is required";
+    if (amount <= 0 || isNaN(amount)) return "Amount must be greater than 0";
+    return "";
+  };
+
+  const validateAccountSecret = (accountSecret) => {
+    if (!accountSecret) return "Account secret is required";
+    if (accountSecret.length < 6) return "Account secret must contain at least 6 characters";
+    return "";
+  };
 
   const handleInputChange = (e) => {
     e.preventDefault();
@@ -52,26 +58,55 @@ export const AddMoneyPage = () => {
       ...prevState,
       [name]: value,
     }));
+
+    if (submittedOnce) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        amountError: name === "amount" ? validateAmount(value) : prevState.amountError,
+        accountSecretError: name === "accountSecret" ? validateAccountSecret(value) : prevState.accountSecretError,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmittedOnce(true);
-    if (!formStates.amount || !formStates.accountSecret) {
-      return;
+
+    // Validate inputs before submission
+    const amountError = validateAmount(formStates.amount);
+    const accountSecretError = validateAccountSecret(formStates.accountSecret);
+
+    if (amountError || accountSecretError) {
+      setFormStates((prevState) => ({
+        ...prevState,
+        amountError,
+        accountSecretError,
+      }));
+      return; // Stop form submission if validation fails
     }
 
     // Call the addMoney function here
-    const updatedAccount = await addMoney({
+    setLoading(true);
+    const { data, error } = await addMoney({
       accountNo,
       amount: formStates.amount,
       accountSecret: formStates.accountSecret,
     });
+    setError(error);
+    setLoading(false);
 
-    if (updatedAccount?._id) {
+    if (data?._id) {
       navigate("/bank-accounts", { replace: true });
     }
   };
+
+  if (loading) {
+    return <LoadingPage />;
+  }
+
+  if (error) {
+    return <ErrorPage error={error} />;
+  }
 
   if (!accountName || !accountNo || !balance) {
     return <Navigate to="/bank-accounts" replace />;
