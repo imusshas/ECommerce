@@ -1,8 +1,9 @@
 import { useState } from "react";
-import "../styles/CreateProduct.css";
 import { ImageUp } from "lucide-react";
 import { createProduct } from "../utils/apiCalls";
 import { ViewProduct } from "../components/ViewProduct";
+import { LoadingPage } from "./LoadingPage";
+import { ErrorPage } from "./ErrorPage";
 
 export const CreateProductPage = () => {
   const [loading, setLoading] = useState(false);
@@ -21,8 +22,6 @@ export const CreateProductPage = () => {
   });
   const [imagePreview, setImagePreview] = useState("");
   const [submittedOnce, setSubmittedOnce] = useState(false);
-
-  useEffect(() => {}, [imagePreview, setImagePreview]);
 
   // Create functions for validation
   // Validate imageUrl also
@@ -135,73 +134,108 @@ export const CreateProductPage = () => {
   }
 
   return (
-    <div className="layout-container">
-      <form onSubmit={handleSubmit} className="create-product-form">
-        <div className="create-product-form-content-wrapper">
-          <div className="create-product-img-input-wrapper">
-            <div className={`create-product-img-input border ${imageInput.error ? "error-border" : ""}`}>
-              <label htmlFor={imageInput.name} className="input-label">
-                {imageInput.error ? (
-                  <>
-                    <ImageUp size={48} color="#d24e1e" />
-                    <p className="error">{imageInput.error}</p>
-                  </>
-                ) : imagePreview ? (
-                  <>
-                    <img src={imagePreview} alt="Product" />
-                    {/* <span>Change Image</span> */}
-                  </>
-                ) : (
-                  <>
-                    <ImageUp size={48} />
-                    <span>Upload Product Image</span>
-                  </>
-                )}
-              </label>
-            </div>
+    <div className="flex-column">
+      <form onSubmit={handleSubmit} className="w-full">
+        <div className="w-full grid-column-2">
+          <div className="h-36">
+            <label
+              htmlFor="imageUrl"
+              className={`w-full h-full h-32 flex-column flex-center border border-large input-label pointer ${
+                formStates.imageUrlError ? "error-border" : ""
+              }`}
+            >
+              {formStates.imageUrlError ? (
+                <>
+                  <ImageUp size={48} color="#b00000" />
+                  <p className="error">{formStates.imageUrlError}</p>
+                </>
+              ) : imagePreview ? (
+                <>
+                  <img src={imagePreview} alt="Product" className="w-full h-full border-large" />
+                </>
+              ) : (
+                <div className="flex-column flex-center">
+                  <ImageUp size={48} />
+                  <span className="placeholder">Upload Product Image</span>
+                </div>
+              )}
+            </label>
             <input
-              type={imageInput.type}
-              accept={imageInput.accept}
-              name={imageInput.name}
-              id={imageInput.name}
-              placeholder={imageInput.placeholder}
+              type="file"
+              accept="image/*"
+              name="imageUrl"
+              id="imageUrl"
+              placeholder="Upload Product Image"
               autoComplete="off"
-              value={imageInput.value}
               onChange={handleImageChange}
-              className={imageInput.error ? "error" : ""}
+              className={formStates.imageUrlError ? "error" : ""}
             />
           </div>
 
-          <div className="create-product-text-input-group">
-            {formInputs.map((input) => (
-              <div key={input.name} className={`${input?.className || "input-group"}`}>
-                <label htmlFor={input.name} className="input-label">
-                  {input.field}
-                </label>
-                <div className={`${input?.className || ""}`}>
-                  <input
-                    type={input.type}
-                    accept={input.accept}
-                    name={input.name}
-                    id={input.name}
-                    placeholder={input.placeholder}
-                    autoComplete="off"
-                    value={input.value}
-                    onChange={handleInputChange}
-                    className={input.error ? "error" : input?.className || ""}
-                  />
-                  <p className="error">{input.error}</p>
-                </div>
-              </div>
-            ))}
+          <div className="flex-1 flex-column">
+            <div className="input-group">
+              <label htmlFor="name" className="input-label">
+                Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                id="name"
+                placeholder="Enter Product Name"
+                autoComplete="off"
+                value={formStates.name}
+                onChange={handleInputChange}
+                className={formStates.nameError ? "error" : ""}
+              />
+              <p className="error">{formStates.nameError}</p>
+            </div>
+
+            <div className="input-group">
+              <label htmlFor="price" className="input-label">
+                Price
+              </label>
+              <input
+                type="number"
+                name="price"
+                id="price"
+                placeholder="Enter Price"
+                autoComplete="off"
+                value={formStates.price}
+                onChange={handleInputChange}
+                className={formStates.priceError ? "error" : ""}
+              />
+              <p className="error">{formStates.priceError}</p>
+            </div>
+
+            <div className="input-group">
+              <label htmlFor="description" className="input-label">
+                Product Description
+              </label>
+              <textarea
+                name="description"
+                id="description"
+                placeholder="Enter Product Description"
+                autoComplete="off"
+                value={formStates.description}
+                onChange={handleInputChange}
+                className={formStates.descriptionError ? "error" : ""}
+              />
+              <p className="error">{formStates.descriptionError}</p>
+            </div>
           </div>
         </div>
-        <button type="submit" disabled={formInputs.some((input) => input.error)}>
+        <button
+          type="submit"
+          className="margin-vertical"
+          disabled={
+            formStates.imageUrlError || formStates.nameError || formStates.priceError || formStates.descriptionError
+          }
+        >
           Create Product
         </button>
       </form>
       {product?._id && (
-        <div>
+        <div className="w-full flex-column gap-vertical-small">
           <h2 className="form-title">Product Created Successfully</h2>
           <ViewProduct {...product} />
         </div>

@@ -124,7 +124,7 @@ export const AddMoneyPage = () => {
             Account No: <span>{accountNo}</span>
           </p>
           <p>
-            Current Balance: <span>{balance}</span>
+            Current Balance: <span className="price">&#x09F3;{balance}</span>
           </p>
         </div>
         {formInputs.map((input) => (

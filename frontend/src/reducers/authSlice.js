@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { axios } from '../utils/axiosInstance';
 import { persistor } from '../app/store';
+import { formattedError } from '../utils/formattedError';
 
 
 const signup = createAsyncThunk('auth/signup', async ({ name, email, password, role }, { rejectWithValue }) => {
@@ -9,7 +10,8 @@ const signup = createAsyncThunk('auth/signup', async ({ name, email, password, r
     return response.data.data;
   } catch (error) {
     console.log("Error while signing up:", error);
-    return rejectWithValue(error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
+    const err = formattedError(error);
+    return rejectWithValue(err);
   }
 });
 
@@ -20,7 +22,8 @@ const login = createAsyncThunk('auth/login', async ({ email, password }, { rejec
     return response.data.data; // Assuming user data is in the 'data' field of the response
   } catch (error) {
     console.log("Error while logging in:", error);
-    return rejectWithValue(error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
+    const err = formattedError(error);
+    return rejectWithValue(err);
   }
 }
 );
@@ -32,7 +35,8 @@ const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) =>
     return response.data.data; // Assuming user data is in the 'data' field of the response
   } catch (error) {
     console.log("Error while logging out:", error);
-    return rejectWithValue(error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
+    const err = formattedError(error);
+    return rejectWithValue(err);
   }
 })
 
@@ -42,7 +46,8 @@ const getUser = createAsyncThunk('auth/getUser', async (_, { rejectWithValue }) 
     return response.data.data; // Assuming user data is in the 'data' field of the response
   } catch (error) {
     console.log("Error while fetching user data:", error);
-    return rejectWithValue(error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
+    const err = formattedError(error);
+    return rejectWithValue(err);
   }
 });
 
@@ -52,7 +57,8 @@ const refreshAccessToken = createAsyncThunk('auth/refreshAccessToken', async (_,
     return response.data.data; // Assuming user data is in the 'data' field of the response
   } catch (error) {
     console.log("Error while refreshing access token:", error);
-    return rejectWithValue(error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
+    const err = formattedError(error);
+    return rejectWithValue(err);
   }
 })
 

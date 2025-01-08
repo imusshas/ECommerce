@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createBankAccount } from "../utils/apiCalls";
 import { LoadingPage } from "./LoadingPage";
+import { BankAccountItem } from "../components/BankAccountItem";
 import { ErrorPage } from "./ErrorPage";
 
 export const CreateBankAccountPage = () => {
@@ -122,8 +123,8 @@ export const CreateBankAccountPage = () => {
   }
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
+    <div className="flex-column">
+      <form onSubmit={handleSubmit} className="w-full">
         <h1 className="form-title">Create Bank Account</h1>
         {formInputs.map((input) => (
           <div key={input.name} className="input-group">
@@ -150,6 +151,8 @@ export const CreateBankAccountPage = () => {
           Submit
         </button>
       </form>
+
+      {bankAccount?._id && <BankAccountItem {...bankAccount} />}
     </div>
   );
 };

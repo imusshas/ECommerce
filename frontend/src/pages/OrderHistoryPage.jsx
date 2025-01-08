@@ -1,31 +1,43 @@
 import { useEffect, useState } from "react";
 import { getOrderHistory } from "../utils/apiCalls";
 import { OrderHistoryItem } from "../components/OrderHistoryItem";
-
-import "../styles/OrderHistory.css";
 import { EmptyOrderHistory } from "../components/EmptyOrderHistory";
+import { LoadingPage } from "./LoadingPage";
+import { ErrorPage } from "./ErrorPage";
 
 export const OrderHistoryPage = () => {
+  const [loading, setLoading] = useState(true);
   const [orderHistory, setOrderHistory] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const statusOrder = ["Pending", "Approved Unpaid", "Approved Paid", "Shipping", "Delivered"];
 
     const fetchOrderHistory = async () => {
-      const orderHistory = await getOrderHistory();
-      orderHistory.sort((a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status));
-      setOrderHistory(orderHistory);
+      const { data, error } = await getOrderHistory();
+      data.sort((a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status));
+      setOrderHistory(data);
+      setError(error);
+      setLoading(false);
     };
 
     fetchOrderHistory();
   }, []);
+
+  if (loading) {
+    return <LoadingPage />;
+  }
+
+  if (error) {
+    return <ErrorPage error={error} />;
+  }
 
   if (orderHistory.length === 0) {
     return <EmptyOrderHistory />;
   }
 
   return (
-    <div>
+    <div className="flex-column w-full">
       {orderHistory.map((order) => (
         <OrderHistoryItem key={order._id} {...order} />
       ))}

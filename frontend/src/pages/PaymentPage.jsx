@@ -1,10 +1,8 @@
 import { useState } from "react";
+import { LoadingPage } from "./LoadingPage";
 import { useDispatch, useSelector } from "react-redux";
 import { makePayment } from "../reducers/orderSlice";
-
-import "../styles/Payment.css";
 import { Navigate } from "react-router-dom";
-import { LoadingPage } from "./LoadingPage";
 
 export const PaymentPage = () => {
   const { cart, transaction, loading, error } = useSelector((state) => state.order);
@@ -60,6 +58,7 @@ export const PaymentPage = () => {
       }));
       return;
     }
+
     dispatch(makePayment({ orderId: cart._id, accountSecret: formStates.accountSecret }));
   };
 
@@ -79,14 +78,14 @@ export const PaymentPage = () => {
     <div className="form-wrapper">
       <form onSubmit={handleSubmit}>
         <h1 className="form-title">Make Payment</h1>
-        <div className="payment-info">
+        <p className="error">Please enter account secret to confirm payment</p>
+        <div className="w-full flex-column gap-vertical-small">
           <p>
-            Payable Total: <span className="total-price payment-price">&nbsp;&#x09F3;{cart.amount}</span>
+            Payable Total: <span className="text-large price">&nbsp;&#x09F3;{cart.amount}</span>
           </p>
           <p>
             Payment Method: <span>&nbsp;Admin Bank</span>
           </p>
-          <p>Please enter your account secret to confirm payment</p>
         </div>
         <div key={input.name} className="input-group">
           <label htmlFor={input.name} className="input-label">

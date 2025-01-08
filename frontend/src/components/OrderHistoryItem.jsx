@@ -3,7 +3,7 @@ import { formattedDate } from "../utils/formattedDate";
 
 export const OrderHistoryItem = ({ _id: id, createdAt, amount, status }) => {
   return (
-    <div className="flex-column flex-column-small">
+    <div className="flex-column flex-column-small border border-large w-full padding">
       <p>
         Order ID: <span>{id}</span>
       </p>

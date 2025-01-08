@@ -2,23 +2,20 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../reducers/authSlice";
 import { ShoppingCart } from "lucide-react";
-
-import "../styles/Header.css";
+import { LoadingPage } from "../pages/LoadingPage";
+import { ErrorPage } from "../pages/ErrorPage";
 
 export const Header = () => {
-  const { loading, error, user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  const { cart, loading: cartLoading, error: cartError } = useSelector((state) => state.order);
+  const { cart, loading, error } = useSelector((state) => state.order);
 
-  if (loading || cartLoading) {
-    return <p>Loading...</p>;
+  if (loading) {
+    return <LoadingPage />;
   }
 
-  if (error || cartError) {
-    console.log("error", error);
-    console.log("cartError", cartError);
-
-    return <p>{error ? `user error: ${error}` : `cartError: ${cartError}`}</p>;
+  if (error) {
+    return <ErrorPage error={error} from="Header" />;
   }
 
   const handleClick = () => {
@@ -37,11 +34,11 @@ export const Header = () => {
           <>
             <Link to="/order-history">Orders</Link>
             <Link to="/account-info">Bank Account</Link>
-            <Link to="/cart" className="cart-link">
-              <ShoppingCart className="cart-icon" />
+            <Link to="/cart" className="flex relative">
+              <ShoppingCart color="#00b000" />
               {cart.products && Object.keys(cart.products).length > 0 && (
-                <div>
-                  <span>{Object.keys(cart.products).length}</span>
+                <div className="circle-bg flex absolute icon-link-text-position">
+                  <span className="text-small">{Object.keys(cart.products).length}</span>
                 </div>
               )}
             </Link>

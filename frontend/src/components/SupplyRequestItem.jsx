@@ -1,9 +1,10 @@
 import PropTypes from "prop-types";
 import { approveSupplyRequest } from "../utils/apiCalls";
 
-export const SupplyRequestItem = ({ orderId, customerName, customerEmail, amount, fetchSupplyRequest }) => {
+export const SupplyRequestItem = ({ orderId, customerName, customerEmail, amount, fetchSupplyRequest, setLoading }) => {
   const handleClick = async () => {
     try {
+      setLoading(true);
       await approveSupplyRequest(orderId);
       await fetchSupplyRequest();
     } catch (error) {
@@ -12,18 +13,18 @@ export const SupplyRequestItem = ({ orderId, customerName, customerEmail, amount
   };
 
   return (
-    <div className="flex-column flex-column-small">
+    <div className="flex-column gap-vertical-small border border-large padding">
       <p className="date">
         Order ID: <span className="date">{orderId}</span>
       </p>
-      <p>
+      <p className="text-bold">
         Customer Name: <span>{customerName}</span>
       </p>
-      <p>
+      <p className="text-bold">
         Customer Email: <span>{customerEmail}</span>
       </p>
-      <p>
-        Amount: <span className="money">{amount}</span>
+      <p className="text-bold">
+        Amount: <span className="money">&#x09F3;{amount}</span>
       </p>
       <button onClick={handleClick} className="self-center">
         Approve
@@ -38,4 +39,5 @@ SupplyRequestItem.propTypes = {
   customerEmail: PropTypes.string.isRequired,
   amount: PropTypes.number.isRequired,
   fetchSupplyRequest: PropTypes.func.isRequired,
+  setLoading: PropTypes.func.isRequired,
 };

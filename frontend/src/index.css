@@ -1,20 +1,30 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 
 :root {
-  --primary-color: #007000;
-  --hover-color: #005000;
+  --primary-color: #00b000;
+  --hover-color: #00d000;
   --middle-color: #0000f0;
   --warning-color: #007070;
-  --error-color: #d24e1e;
-  --error-hover-color: #f24e1e;
+  --error-color: #b00;
+  --error-hover-color: #d00;
   --disabled-color: #ccc;
-  --faded-color: #888;
-  --background-color: #fefefe;
-  --text-color: #333;
+  --placeholder-color: #888;
+  --text-color: #fff;
+  --background-color: #333;
+  --primary-blur-color: rgba(0, 176, 0, 0.5);
+  --error-blur-color: rgb(187, 0, 0, 0.5);
+  --hover-blur-color: rgba(0, 208, 0, 0.5);
+  --error-hover-blur-color: rgb(221, 0, 0, 0.5);
+
+  
   --box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.1);
 
+  --padding-small: 0.8rem;
+  --padding: 1.6rem;
+  --padding-medium: 2.4rem;
+
   --border: 0.1rem solid #ccc;
-  --border-focus: 0.2rem solid var(--primary-color);
+  --border-focus: 0.2rem solid var(--hover-color);
   --border-radius-large: 0.8rem;
   --border-radius-small: 0.4rem;
   --border-radius-rounded: 100%;
@@ -23,6 +33,7 @@
   --gap-vertical: 2.4rem;
   --gap-vertical-small: 1.6rem;
 
+  --input-padding: 1rem 1.6rem;
   --button-padding: 1.2rem 2.4rem;
   --button-hover-padding: 1.3rem 2.7rem;
   --form-padding: 5rem;
@@ -45,9 +56,29 @@ html {
   font-size: 10px;
 }
 body {
+  width: 100vw;
+  height: 100%;
   font-size: 1.6rem;
   color: var(--text-color);
   line-height: 1.5;
+
+  background-image: url("/green_wave_bg.jpg");
+  background-size: cover;        /* Ensures the image covers the entire screen */
+  background-position: center;   /* Centers the image */
+  background-attachment: fixed;  /* Keeps the background fixed when scrolling */
+  background-repeat: no-repeat;  /* Prevents the image from repeating */
+}
+
+body:after {
+  content: "";
+  position: fixed;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: -1;
 }
 
 h1,
@@ -62,13 +93,12 @@ h6 {
 
 a {
   text-decoration: none;
-  color: var(--primary-color);
+  color: var(--hover-color);
   cursor: pointer;
 }
 
 a:hover {
   text-decoration: underline;
-  transition: text-decoration 0.1s linear;
 }
 
 li {
@@ -83,16 +113,16 @@ input {
   font-size: 1.6rem;
   width: 100%;
   background: none;
-  border: #ccc solid 1px;
+  border: var(--border);
   border-radius: var(--border-radius-small);
-  padding: 1rem 1.6rem;
+  padding: var(--input-padding);
 }
 
 input:focus {
   border: var(--border-focus);
-  transition: border;
+  /* transition: border;
   transition-duration: var(--transition-duration);
-  transition-timing-function: var(--transition-timing-function);
+  transition-timing-function: var(--transition-timing-function); */
 }
 
 input[type="number"]::-webkit-outer-spin-button,
@@ -111,11 +141,30 @@ input[type="file"] {
   display: none;
 }
 
+textarea {
+  font-size: 1.6rem;
+  width: 100%;
+  height: 9rem;
+  background: none;
+  border: var(--border);
+  border-radius: var(--border-radius-small);
+  padding: var(--input-padding);
+  outline: none;
+
+}
+
+textarea:focus {
+  border: var(--border-focus);
+  /* transition: border;
+  transition-duration: var(--transition-duration);
+  transition-timing-function: var(--transition-timing-function); */
+}
+
 button {
   font-size: 1.6rem;
   background-color: var(--primary-color);
-  color: var(--background-color);
-  padding: 1rem 2.4rem;
+  color: var(--text-color);
+  padding: var(--button-padding);
   border: none;
   border-radius: var(--border-radius-small);
   cursor: pointer;
@@ -147,3 +196,43 @@ form {
 img {
   object-fit: cover;
 }
+
+header {
+  min-width: 100vw;
+  padding: 1.6rem 8rem;
+  box-shadow: var(--box-shadow);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  z-index: 1000;
+}
+
+header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(1rem); /* Apply blur to content behind the header */
+  z-index: -1;
+}
+
+header img {
+  height: 4rem;
+  border-radius: var(--border-radius-large);
+}
+
+header nav {
+  display: flex;
+  gap: var(--gap-horizontal);
+  align-items: center;
+}
+

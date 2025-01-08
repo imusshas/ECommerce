@@ -3,8 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { formattedDate } from "../utils/formattedDate";
 import { getCart } from "../reducers/orderSlice";
 
-import "../styles/Payment.css";
-
 export const Success = () => {
   const { transaction } = useSelector((state) => state.order);
   const dispatch = useDispatch();
@@ -19,9 +17,9 @@ export const Success = () => {
 
   return (
     <div className="form-wrapper success">
-      <form onSubmit={handleSubmit} className="bg">
+      <form onSubmit={handleSubmit}>
         <h1 className="form-title">Payment Successful</h1>
-        <div className="payment-info">
+        <div className="w-full flex-column flex-column-small">
           <p>
             Transaction ID: <span>{id}</span>
           </p>
@@ -29,7 +27,7 @@ export const Success = () => {
             Order ID: <span>{orderId}</span>
           </p>
           <p>
-            Amount: <span>&#x09F3;{amount}</span>
+            Amount: <span className="price">&#x09F3;{amount}</span>
           </p>
           <p>
             Payment Method: <span>Admin Bank</span>

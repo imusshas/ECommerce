@@ -19,20 +19,22 @@ import { BankAccountsPage } from "./pages/BankAccountsPage";
 import { AddMoneyPage } from "./pages/AddMoneyPage";
 import { CreateBankAccountPage } from "./pages/CreateBankAccountPage";
 import { ProductsPage } from "./pages/ProductsPage";
-
-import "./App.css";
 import { CreateProductPage } from "./pages/CreateProductPage";
 import { DeliveryRequestPage } from "./pages/DeliveryRequestPage";
+import { LoadingPage } from "./pages/LoadingPage";
+import { ErrorPage } from "./pages/ErrorPage";
+
+import "./App.css";
 
 export const App = () => {
   const { loading, error, user } = useSelector((state) => state.auth);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingPage />;
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <ErrorPage error={error}/>;
   }
 
   return (

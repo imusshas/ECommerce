@@ -21,13 +21,13 @@ export const CartItem = ({ id, name, description, imageUrl, price, quantity }) =
   };
 
   return (
-    <div className="cart-item">
-      <img src={imageUrl} alt={name} />
-      <div className="cart-item-info">
-        <h3 className="name">{name}</h3>
-        <div className="flex-justify-between desc-quantity-price">
+    <div className="w-full flex column-span-2 border border-large padding-right">
+      <img src={imageUrl} alt={name} className="flex-img" />
+      <div className="flex-column gap-vertical-small flex-1">
+        <h3 className="text-bold">{name}</h3>
+        <div className="flex-justify-between">
           <p className="description flex-1">{formattedDescription}</p>
-          <div className="flex border-none margin-none">
+          <div className="flex">
             <button className="icon-btn" onClick={handleIncrementClick}>
               +
             </button>
@@ -39,7 +39,7 @@ export const CartItem = ({ id, name, description, imageUrl, price, quantity }) =
           <p className="price">&#x09F3;{price}</p>
         </div>
         <button onClick={handleDeleteClick} className="delete-btn">
-          <Trash size={24} strokeWidth={1} color="#F24E1E" />
+          <Trash size={24} strokeWidth={1} color="#d00" fill="#d0000050" />
         </button>
       </div>
     </div>

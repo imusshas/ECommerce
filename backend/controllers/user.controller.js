@@ -71,7 +71,7 @@ const addBillingInfo = async (req, res) => {
   }
 }
 
-const getProducts = async (req, res) => {
+const getProducts = async (_, res) => {
   try {
     const products = await Product.find({});
     res.status(200).json(new ApiResponse(200, products, "Products fetched successfully"));

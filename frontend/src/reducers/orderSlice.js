@@ -9,7 +9,8 @@ const getCart = createAsyncThunk("order/getCart", async (_, { rejectWithValue })
     return response.data.data;
   } catch (error) {
     console.log("Error while getting cart:", error);
-    return rejectWithValue(error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
+    const err = formattedError(error);
+    return rejectWithValue(err);
   }
 });
 
@@ -20,7 +21,8 @@ const addToCart = createAsyncThunk("order/addToCart", async ({ productId, quanti
     return response.data.data;
   } catch (error) {
     console.log("Error while adding to cart:", error);
-    return rejectWithValue(error.response ? `${error.response.status} ${error.response.statusText}` : error.message);
+    const err = formattedError(error);
+    return rejectWithValue(err);
   }
 });
 

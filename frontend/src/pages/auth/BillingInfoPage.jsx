@@ -1,9 +1,9 @@
 import { useState } from "react";
-import "../../styles/Auth.css";
 import { addBillingInfo } from "../../utils/apiCalls";
-import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { getUser } from "../../reducers/authSlice";
+import { getUser, logout } from "../../reducers/authSlice";
+import { LoadingPage } from "../LoadingPage";
+import { ErrorPage } from "../ErrorPage";
 
 export const BillingInfoPage = () => {
   const dispatch = useDispatch();
@@ -19,7 +19,6 @@ export const BillingInfoPage = () => {
   });
 
   const [submittedOnce, setSubmittedOnce] = useState(false);
-  const [bankAccount, setBankAccount] = useState({});
 
   const formInputs = [
     {
@@ -90,12 +89,11 @@ export const BillingInfoPage = () => {
     // Proceed with API call if validation is passed
     setLoading(true);
     console.log(formStates);
-    const { data, error } = await addBillingInfo({
+    const { error } = await addBillingInfo({
       accountNo: formStates.accountNo,
       accountSecret: formStates.accountSecret,
     });
 
-    setBankAccount(data);
     setError(error);
     setLoading(false);
 
@@ -109,18 +107,18 @@ export const BillingInfoPage = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingPage />;
   }
 
   if (error) {
-    return <div>{error.message}</div>;
+    return <ErrorPage error={error} />;
   }
 
   return (
     <div className="form-wrapper flex-column flex-center border-none">
       <form onSubmit={handleSubmit}>
         <h1 className="form-title">Billing Information</h1>
-        {!bankAccount?._id && <p className="error">Please add your billing information to proceed further</p>}
+        <p className="error">Please add your billing information to proceed further</p>
         {formInputs.map((input) => (
           <div key={input.name} className="input-group">
             <label htmlFor={input.name} className="input-label">
@@ -136,7 +134,6 @@ export const BillingInfoPage = () => {
                 value={input.value}
                 onChange={handleInputChange}
                 className={input.error ? "error" : ""}
-                disabled={bankAccount?._id}
               />
               <p className="error">{input.error}</p>
             </div>
@@ -144,38 +141,15 @@ export const BillingInfoPage = () => {
         ))}
 
         <div className="flex">
-          <button type="submit" disabled={formInputs.some((input) => input.error) || bankAccount?._id} className="btn">
+          <button type="submit" disabled={formInputs.some((input) => input.error)} className="btn">
             Submit
           </button>
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={formInputs.some((input) => input.error) || bankAccount?._id}
-            className="btn"
-          >
+
+          <button type="button" onClick={handleLogout} className="error-btn">
             Logout
           </button>
         </div>
       </form>
-
-      {bankAccount?._id && (
-        <div className="flex-column flex-column-small flex-center">
-          <div className="flex-column flex-column-small border-none margin-none">
-            <p>
-              Account Name: <span>{bankAccount?.accountName}</span>
-            </p>
-            <p>
-              Account Number: <span>{bankAccount?.accountNo}</span>
-            </p>
-            <p>
-              Balance: <span>{bankAccount?.balance}</span>
-            </p>
-          </div>
-          <Link to="/" className="link-btn">
-            Go to Home
-          </Link>
-        </div>
-      )}
     </div>
   );
 };

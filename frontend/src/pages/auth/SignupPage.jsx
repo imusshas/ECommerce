@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, Navigate } from "react-router-dom";
 import { signup } from "../../reducers/authSlice";
-import "../../styles/Auth.css";
 
 export const SignupPage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -137,13 +136,15 @@ export const SignupPage = () => {
         <h1 className="form-title">
           <img src="/commercac.png" alt="" />
         </h1>
-        <div className="role-buttons">
+        <div className="flex">
           {Object.keys(userRoles).map((role) => (
             <button
               key={role}
               type="button"
               onClick={() => handleRoleClick(userRoles[role])}
-              className={`${formStates.role === userRoles[role] ? "selected" : ""}`}
+              className={`${
+                formStates.role === userRoles[role] ? "btn-outlined btn-outlined-selected" : "btn-outlined"
+              }`}
             >
               {userRoles[role]}
             </button>
@@ -152,7 +153,9 @@ export const SignupPage = () => {
 
         {formInputs.map((input) => (
           <div key={input.name} className="input-group">
-            <label htmlFor={input.name} className="input-label">{input.field}</label>
+            <label htmlFor={input.name} className="input-label">
+              {input.field}
+            </label>
             <div>
               <input
                 type={input.type}

@@ -2,19 +2,34 @@ import { useEffect, useState } from "react";
 import { getTransactionRequests } from "../utils/apiCalls";
 import { TransactionRequestItem } from "../components/TransactionRequestItem";
 import { EmptyTransactionRequest } from "../components/EmptyTransactionRequest";
+import { LoadingPage } from "./LoadingPage";
+import { ErrorPage } from "./ErrorPage";
 
 export const HomePageBank = () => {
+
+  const [loading, setLoading] = useState(true)
   const [transactionRequests, setTransactionRequests] = useState([]);
+  const [error, setError] = useState(null);
 
   const fetchTransactionRequests = async () => {
-    const transactionRequests = await getTransactionRequests();
+    const {data, error} = await getTransactionRequests();
 
-    setTransactionRequests(transactionRequests);
+    setTransactionRequests(data);
+    setError(error);
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchTransactionRequests();
   }, []);
+
+  if (loading) {
+    return <LoadingPage />;
+  }
+
+  if (error) {
+    return <ErrorPage error={error} />;
+  }
 
   if (transactionRequests.length === 0) {
     return <EmptyTransactionRequest />;
@@ -27,6 +42,7 @@ export const HomePageBank = () => {
           key={transactionRequest._id}
           {...transactionRequest}
           fetchTransactionRequests={fetchTransactionRequests}
+          setLoading={setLoading}
         />
       ))}
     </div>

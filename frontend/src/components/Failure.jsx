@@ -23,11 +23,11 @@ export const Failure = () => {
 
   return (
     <div className="form-wrapper failure">
-      <form onSubmit={handleSubmit} className="bg">
-        <h1 className="form-title error">Payment Failed</h1>
+      <form onSubmit={handleSubmit}>
+        <h1 className="error text-medium text-bold">Payment Failed</h1>
         <p className="error-code">{error?.statusCode ? error.statusCode : "Error"}</p>
-        <p className="error-message">{error?.statusText ? error.statusText : "Something went wrong"}</p>
-        <p>{error?.message}</p>
+        <p>{error?.statusText ? error.statusText : "Something went wrong"}</p>
+        <p className="error-message">{error?.message}</p>
         <button type="submit" className="error-link-btn">
           Back to Home
         </button>

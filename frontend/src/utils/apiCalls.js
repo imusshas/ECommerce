@@ -1,12 +1,13 @@
 import { axios } from "./axiosInstance";
+import { formattedError } from "./formattedError";
 
 const addBillingInfo = async ({ accountNo, accountSecret }) => {
   try {
     const response = await axios.post("/user/billing-info", { accountNo, accountSecret });
-    return response.data.data;
+    return { data: response.data.data, error: null };
   } catch (error) {
     console.log("Error while adding billing info:", error);
-    return {};
+    return { data: {}, error: formattedError(error) };
   }
 
 }
@@ -14,50 +15,55 @@ const addBillingInfo = async ({ accountNo, accountSecret }) => {
 const getProducts = async () => {
   try {
     const response = await axios.get("/user/products");
-    return response.data.data;
+    return {data: response.data.data, error: null };
   } catch (error) {
     console.log("Error while getting products:", error);
-    return [];
+    const err = formattedError(error);
+    return { data: [], error: err };
   }
 };
 
 const getAccountInfo = async () => {
   try {
     const response = await axios.get("/user/account-info");
-    return response.data.data;
+    return {data: response.data.data, error: null};
   } catch (error) {
     console.log("Error while getting account info:", error);
-    return {};
+    const err = formattedError(error);
+    return { data: {}, error: err };
   }
 }
 
 const getOrderHistory = async () => {
   try {
     const response = await axios.get("/customer/order-history");
-    return response.data.data;
+    return {data: response.data.data, error: null};
   } catch (error) {
     console.log("Error while getting order history:", error);
-    return [];
+    const err = formattedError(error);
+    return { data: [], error: err };
   }
 };
 
 const getBankAccounts = async () => {
   try {
     const response = await axios.get("/bank/accounts");
-    return response.data.data;
+    return { data: response.data.data, error: null };
   } catch (error) {
     console.log("Error while getting bank accounts:", error);
-    return [];
+    const err = formattedError(error);
+    return { data: [], error: err };
   }
 }
 
 const getTransactionRequests = async () => {
   try {
     const response = await axios.get("/bank/transaction-requests");
-    return response.data.data;
+    return { data: response.data.data, error: null }
   } catch (error) {
     console.log("Error while getting transaction requests:", error);
-    return [];
+    const err = formattedError(error);
+    return { data: [], error: err };
   }
 }
 
@@ -74,40 +80,43 @@ const approveTransactionRequest = async ({ transactionId }) => {
 const getTransactionHistory = async () => {
   try {
     const response = await axios.get("/bank/transaction-history");
-    return response.data.data;
+    return { data: response.data.data, error: null };
   } catch (error) {
     console.log("Error while getting transaction history:", error);
-    return [];
+    const err = formattedError(error);
+    return { data: [], error: err };
   }
 }
 
 const addMoney = async ({ accountNo, amount, accountSecret }) => {
   try {
     const response = await axios.post("/bank/add-money", { accountNo, amount, accountSecret });
-    return response.data.data;
+    return {data: response.data.data, error: null };
   } catch (error) {
     console.log("Error while adding money:", error);
-    return {};
+    const err = formattedError(error);
+    return { data: {}, error: err };
   }
 }
 
 const createBankAccount = async ({ accountNo, balance, accountSecret }) => {
   try {
     const response = await axios.post("/bank/create-account", { accountNo, balance, accountSecret });
-    return response.data.data;
+    return { data: response.data.data, error: null }
   } catch (error) {
-    console.log("Error while creating bank account:", error);
-    return {};
+    const err = formattedError(error);
+    return { data: {}, error: err };
   }
 }
 
 const getOrderRequests = async () => {
   try {
     const response = await axios.get("/e-commerce/order-requests");
-    return response.data.data;
+    return {data: response.data.data, error: null};
   } catch (error) {
     console.log("Error while getting order requests:", error);
-    return [];
+    const err = formattedError(error);
+    return { data: [], error: err };
   }
 }
 
@@ -124,10 +133,11 @@ const approveOrderRequest = async (orderId) => {
 const getSupplyRequests = async () => {
   try {
     const response = await axios.get("/supplier/supply-requests");
-    return response.data.data;
+    return {data: response.data.data, error: null};
   } catch (error) {
     console.log("Error while getting supply requests:", error);
-    return [];
+    const err = formattedError(error);
+    return { data: [], error: err };
   }
 }
 
@@ -149,20 +159,22 @@ const createProduct = async ({ name, price, description, imageUrl }) => {
     formData.append('description', description);
     formData.append('imageUrl', imageUrl);
     const response = await axios.post("/supplier/create-product", formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-    return response.data.data;
+    return { data: response.data.data, error: null };
   } catch (error) {
     console.log("Error while creating product:", error);
-    return {};
+    const err = formattedError(error);
+    return { data: {}, error: err };
   }
 }
 
 const getDeliveryRequests = async () => {
   try {
     const response = await axios.get("/e-commerce/delivery-requests");
-    return response.data.data;
+    return {data: response.data.data, error: null};
   } catch (error) {
     console.log("Error while getting delivery requests:", error);
-    return [];
+    const err = formattedError(error);
+    return { data: [], error: err };
   }
 }
 

@@ -9,20 +9,20 @@ export const BankAccountItem = ({ _id: id, accountName, accountNo, balance }) =>
   };
 
   return (
-    <div className="flex-column flex-column-small">
+    <div className="w-full flex-column flex-column-small border border-large padding">
       <div className="flex-justify-between">
-        <p>
+        <p className="text-bold">
           Account Name: <span>{accountName}</span>
         </p>
         <button onClick={handleClick} className="btn-outlined" disabled={accountName ? false : true}>
           Add Money
         </button>
       </div>
-      <p>
+      <p className="text-bold">
         Account Number: <span>{accountNo}</span>
       </p>
-      <p>
-        Balance: <span>{balance}</span>
+      <p className="text-bold">
+        Balance: <span className="price" >&#x09F3;{balance}</span>
       </p>
     </div>
   );
